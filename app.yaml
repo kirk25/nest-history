@@ -1,0 +1,25 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /bootstrap
+  static_dir: bootstrap
+
+- url: /main.js
+  static_files: main.js
+  upload: main.js
+
+- url: /style.css
+  static_files: style.css
+  upload: style.css
+  
+- url: /.*
+  script: nest-history.app
+
+  
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest
