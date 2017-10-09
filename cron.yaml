@@ -1,0 +1,4 @@
+cron:
+- description: data collection job
+  url: /tasks/collect
+  schedule: every 1 minutes
