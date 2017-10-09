@@ -66,7 +66,6 @@ class Collect(webapp2.RequestHandler):
             'content-type': "application/json",
             'authorization': "Bearer %s" % access_token,
             'cache-control': "no-cache",
-            'postman-token': "88859d7d-8bfb-f966-67cf-d4f89e9fc7a4"
             }
         response = requests.request("GET", NEST_URL, headers=headers, 
                                     allow_redirects = False)
@@ -74,7 +73,7 @@ class Collect(webapp2.RequestHandler):
             response = requests.get(response.headers['Location'], 
                          headers=headers, allow_redirects=False)
         response.raise_for_status()
-        logging.info(response.text)
+        #logging.info(response.text)
         try:
             result = response.json()
         except:
@@ -105,8 +104,7 @@ class Collect(webapp2.RequestHandler):
         #       task takes longer than a minute, meaning the next will overlap
         users = models.Users.query()
         for user in users:
-            logging.info('About to get data for user %s, "%s"', 
-                         user.email, user.access_token)
+            logging.info('About to get data for user %s', user.email)
             self._get_user_data_points(user.email, user.access_token)
 
 
