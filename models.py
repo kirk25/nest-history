@@ -21,6 +21,7 @@ class DataPoint(ndb.Model):
     # TODO: consider a unique kind for each user/structure/where combo, so that
     #       that information doesn't have to be stored in every data point
     user = ndb.StringProperty()
+    timestamp = ndb.DateTimeProperty(auto_now_add=True)
     structure_id = ndb.StringProperty()
     where_id = ndb.StringProperty()
     ambient_temperature_f = ndb.IntegerProperty()
