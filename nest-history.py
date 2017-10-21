@@ -23,11 +23,13 @@
 # SOFTWARE.
 
 # Python imports
+import datetime
 import json
 import time
 import os
 
 # App Engine imports
+import gviz_api
 import jinja2
 import logging
 import requests
@@ -109,6 +111,32 @@ class Collect(webapp2.RequestHandler):
             self._get_user_data_points(user.email, user.access_token)
 
 
+class LoadData(webapp2.RequestHandler):
+
+    def get(self):
+        description = [
+            ('timestamp', 'datetime'),
+            ('temperature', 'number'),
+            ('humidity', 'number'),
+        ]
+        data = []
+        # data = [
+        #     [datetime.datetime(2017, 10, 20, 1, 0), 67, 50],
+        #     [datetime.datetime(2017, 10, 20, 1, 1), 66, 55],
+        #     [datetime.datetime(2017, 10, 20, 1, 2), 65, 60],
+        #     [datetime.datetime(2017, 10, 20, 1, 3), 64, 65],
+        # ]
+
+        query = models.DataPoint.query().filter(models.DataPoint.timestamp >= datetime.datetime.now() - datetime.timedelta(0,21600), models.DataPoint.where_id == '').order(models.DataPoint.timestamp)
+        for point in query:
+            data.append([point.timestamp, point.ambient_temperature_f,
+                         point.humidity])
+
+        data_table = gviz_api.DataTable(description)
+        data_table.LoadData(data)
+        self.response.write(data_table.ToJSonResponse())
+
+
 class MainPage(webapp2.RequestHandler):
 
     def get(self):
@@ -123,4 +151,5 @@ class MainPage(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/tasks/collect', Collect),
+    ('/loadData', LoadData),
 ], debug=True)

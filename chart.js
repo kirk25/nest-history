@@ -5,6 +5,8 @@ google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(loadChartData);
 
 function loadChartData() {
+    document.getElementById('chart_div').innerHTML = 'Loading...'
+    
     var opts = {sendMethod: 'auto'};
     // Replace the data source URL on next line with your data source URL.
     var query = new google.visualization.Query(
@@ -25,10 +27,15 @@ function drawChart(response) {
     }
     
     var data = response.getDataTable();
+
+    // Convert to Pacific time.
+    // TODO: stop hard-coding the offset
+    var formatter = new google.visualization.DateFormat({timeZone: -7});
+    formatter.format(data, 0)
     
     // Set chart options
     var options = {'title':'Readings',
-                   'width':400,
+                   'width':600,
                    'height':300};
 
     // Instantiate and draw our chart, passing in some options.

@@ -1,0 +1,6 @@
+indexes:
+  
+- kind: DataPoint
+  properties:
+    - name: where_id
+    - name: timestamp
