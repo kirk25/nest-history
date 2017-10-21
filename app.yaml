@@ -32,6 +32,10 @@ handlers:
   static_files: main.js
   upload: main.js
 
+- url: /chart.js
+  static_files: chart.js
+  upload: chart.js
+  
 - url: /style.css
   static_files: style.css
   upload: style.css

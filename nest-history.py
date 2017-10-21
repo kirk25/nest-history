@@ -47,7 +47,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
-NEST_URL = "https://developer-api.nest.com/"
+NEST_URL = 'https://developer-api.nest.com/'
 
 
 class Collect(webapp2.RequestHandler):
@@ -67,6 +67,7 @@ class Collect(webapp2.RequestHandler):
             'authorization': "Bearer %s" % access_token,
             'cache-control': "no-cache",
             }
+        # TODO: limit the request to only return fields we care about
         response = requests.request("GET", NEST_URL, headers=headers, 
                                     allow_redirects = False)
         if response.status_code == 307:
@@ -112,7 +113,7 @@ class MainPage(webapp2.RequestHandler):
 
     def get(self):
         template_values = {
-            'time': str(time.strftime('%m/%d/%Y %H:%M:%S')),
+            'time': str(time.strftime('%m/%d/%Y %H:%M:%S %Z')),
         }
 
         template = JINJA_ENVIRONMENT.get_template('index.html')
