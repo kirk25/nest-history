@@ -27,8 +27,11 @@ import datetime
 import json
 import time
 import os
+import urlparse
 
 # App Engine imports
+from google.appengine.ext import deferred
+from google.appengine.ext import ndb
 import gviz_api
 import jinja2
 import logging
@@ -84,20 +87,34 @@ class Collect(webapp2.RequestHandler):
             pass
         # TODO: can a valid response have no devices?  if so handle that
         thermostats = result['devices'].get('thermostats', None)
+        # TODO: we should use the last_connection timestamp, and consider only
+        # writing a sample when that gets updated.  Probably need to use
+        # memcache to track that.
+        now = datetime.datetime.now()
         if thermostats:
             for (device_id, data) in thermostats.items():
                 ambient_temp = int(data['ambient_temperature_f'])
                 target_temp = int(data['target_temperature_f'])
                 fan_active = bool(data['fan_timer_active'])
                 where = data.get('where_id', '')
+                device_id = data['device_id']
+                # last_connection has the format 2017-10-09T05:55:01.184Z
+                last_connection = datetime.datetime.strptime(
+                    data['last_connection'], '%Y-%m-%dT%H:%M:%S.%fZ')
                 entity = models.DataPoint(user=user,
                                           structure_id=data['structure_id'],
+                                          device_id=device_id,
                                           where_id=where,
                                           ambient_temperature_f=ambient_temp,
                                           target_temperature_f=target_temp,
                                           humidity=data['humidity'],
                                           hvac_state=data['hvac_state'],
-                                          fan_timer_active=fan_active)
+                                          fan_timer_active=fan_active,
+                                          timestamp=now,
+                                          last_connection=last_connection,
+                                          minute_ordinal=last_connection.minute,
+                                          hour_ordinal=last_connection.hour,
+                                          day_ordinal=last_connection.day)
                 entity.put()
             
 
@@ -120,12 +137,6 @@ class LoadData(webapp2.RequestHandler):
             ('humidity', 'number'),
         ]
         data = []
-        # data = [
-        #     [datetime.datetime(2017, 10, 20, 1, 0), 67, 50],
-        #     [datetime.datetime(2017, 10, 20, 1, 1), 66, 55],
-        #     [datetime.datetime(2017, 10, 20, 1, 2), 65, 60],
-        #     [datetime.datetime(2017, 10, 20, 1, 3), 64, 65],
-        # ]
 
         query = models.DataPoint.query().filter(models.DataPoint.timestamp >= datetime.datetime.now() - datetime.timedelta(0,21600), models.DataPoint.where_id == '').order(models.DataPoint.timestamp)
         for point in query:
@@ -137,11 +148,56 @@ class LoadData(webapp2.RequestHandler):
         self.response.write(data_table.ToJSonResponse())
 
 
+class BackfillDataPoints(webapp2.RequestHandler):
+    # Temporary handler to backfill device ids in the database.
+    # Also the minuite ordinal, since it's convenient to do now.
+    def get(self):
+        deferred.defer(update_schema)
+        
+
+def update_schema(cursor=None, num_updated=0, batch_size=100):
+    # Get all of the entities for this Model.
+    query = models.DataPoint.query()
+    data, next_cursor, more = query.fetch_page(
+        batch_size, start_cursor=cursor)
+    
+    to_put = []
+    for point in data:
+        if (not point.last_connection or 
+            point.last_connection == datetime.datetime.min):
+            point.last_connection = datetime.datetime.min
+            point.hour_ordinal = point.timestamp.hour
+            point.day_ordinal = point.timestamp.day
+        else:
+            point.minute_ordinal = point.last_connection.minute
+            point.hour_ordinal = point.last_connection.hour
+            point.day_ordinal = point.last_connection.day
+        to_put.append(point)
+
+    # Save the updated entities.
+    if to_put:
+        ndb.put_multi(to_put)
+        num_updated += len(to_put)
+        logging.info(
+            'Put {} entities to Datastore for a total of {}'.format(
+                len(to_put), num_updated))
+
+    # If there are more entities, re-queue this task for the next page.
+    if more:
+        deferred.defer(
+            update_schema, cursor=next_cursor, num_updated=num_updated)
+    else:
+        logging.debug(
+            'update_schema complete with {0} updates!'.format(
+                num_updated))
+
+
 class MainPage(webapp2.RequestHandler):
 
     def get(self):
         template_values = {
             'time': str(time.strftime('%m/%d/%Y %H:%M:%S %Z')),
+            'loadURL': urlparse.urljoin(self.request.url, '/loadData')
         }
 
         template = JINJA_ENVIRONMENT.get_template('index.html')
@@ -152,4 +208,5 @@ app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/tasks/collect', Collect),
     ('/loadData', LoadData),
+    ('/backfillDataPoints', BackfillDataPoints),
 ], debug=True)

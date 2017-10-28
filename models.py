@@ -43,11 +43,22 @@ class DataPoint(ndb.Model):
     # TODO: consider a unique kind for each user/structure/where combo, so that
     #       that information doesn't have to be stored in every data point
     user = ndb.StringProperty()
-    timestamp = ndb.DateTimeProperty(auto_now_add=True)
+    # The timestamp at which this point was collected.
+    timestamp = ndb.DateTimeProperty(auto_now_add=False)
+    # The timestamp at which Nest's service last contacted the device.
+    last_connection = ndb.DateTimeProperty(auto_now_add=False)
     structure_id = ndb.StringProperty()
     where_id = ndb.StringProperty()
+    device_id = ndb.StringProperty()
     ambient_temperature_f = ndb.IntegerProperty()
     target_temperature_f = ndb.IntegerProperty()
     humidity = ndb.IntegerProperty()
     hvac_state = ndb.StringProperty()
     fan_timer_active = ndb.BooleanProperty()
+    # The minute, hour and day ordinals of the timestamp.  Indexing these
+    # separately enables queries to select the granularity of the data that
+    # they fetch, i.e. one data point per minute/hour/day.
+    # Values are extracted directly from Python's datetime.datetime obejcts.
+    minute_ordinal = ndb.IntegerProperty()
+    hour_ordinal = ndb.IntegerProperty()
+    day_ordinal = ndb.IntegerProperty()
