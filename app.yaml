@@ -24,6 +24,10 @@ runtime: python27
 api_version: 1
 threadsafe: true
 
+builtins:
+# Deferred is required to use google.appengine.ext.deferred.
+- deferred: on
+
 handlers:
 - url: /bootstrap
   static_dir: bootstrap
@@ -39,6 +43,11 @@ handlers:
 - url: /style.css
   static_files: style.css
   upload: style.css
+
+- url: /backfillDataPoints
+  script: nest-history.app
+  login: admin
+  secure: always
   
 - url: /.*
   script: nest-history.app

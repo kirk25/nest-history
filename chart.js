@@ -9,8 +9,7 @@ function loadChartData() {
     
     var opts = {sendMethod: 'auto'};
     // Replace the data source URL on next line with your data source URL.
-    var query = new google.visualization.Query(
-        'https://nest-thermostat-history.appspot.com/loadData', opts);
+    var query = new google.visualization.Query(loadDataURL, opts);
     
     // Send the query with a callback function.
     query.send(drawChart);
