@@ -30,6 +30,7 @@ import os
 import urlparse
 
 # App Engine imports
+from google.appengine.api import memcache
 from google.appengine.ext import deferred
 from google.appengine.ext import ndb
 import gviz_api
@@ -93,30 +94,44 @@ class Collect(webapp2.RequestHandler):
         now = datetime.datetime.now()
         if thermostats:
             for (device_id, data) in thermostats.items():
-                ambient_temp = int(data['ambient_temperature_f'])
-                target_temp = int(data['target_temperature_f'])
-                fan_active = bool(data['fan_timer_active'])
-                where = data.get('where_id', '')
-                device_id = data['device_id']
                 # last_connection has the format 2017-10-09T05:55:01.184Z
                 last_connection = datetime.datetime.strptime(
                     data['last_connection'], '%Y-%m-%dT%H:%M:%S.%fZ')
-                entity = models.DataPoint(user=user,
-                                          structure_id=data['structure_id'],
-                                          device_id=device_id,
-                                          where_id=where,
-                                          ambient_temperature_f=ambient_temp,
-                                          target_temperature_f=target_temp,
-                                          humidity=data['humidity'],
-                                          hvac_state=data['hvac_state'],
-                                          fan_timer_active=fan_active,
-                                          timestamp=now,
-                                          last_connection=last_connection,
-                                          minute_ordinal=last_connection.minute,
-                                          hour_ordinal=last_connection.hour,
-                                          day_ordinal=last_connection.day)
-                entity.put()
+                if self.shouldUpdate(device_id, last_connection):
+                    ambient_temp = int(data['ambient_temperature_f'])
+                    target_temp = int(data['target_temperature_f'])
+                    fan_active = bool(data['fan_timer_active'])
+                    where = data.get('where_id', '')
+                    device_id = data['device_id']
+                    entity = models.DataPoint(
+                        user=user,
+                        structure_id=data['structure_id'],
+                        device_id=device_id,
+                        where_id=where,
+                        ambient_temperature_f=ambient_temp,
+                        target_temperature_f=target_temp,
+                        humidity=data['humidity'],
+                        hvac_state=data['hvac_state'],
+                        fan_timer_active=fan_active,
+                        timestamp=now,
+                        last_connection=last_connection,
+                        minute_ordinal=last_connection.minute,
+                        hour_ordinal=last_connection.hour,
+                        day_ordinal=last_connection.day)
+                    entity.put()
+                    logging.info('Adding data point for device %s', device_id)
+                else:
+                    logging.info('Skipping duplicate data point for device %s',
+                                 device_id)
             
+    def shouldUpdate(self, device_id, timestamp):
+        key = '%s:last_connection' % device_id
+        prev = memcache.get(key)
+        if not prev or prev != timestamp:
+            ok = memcache.set(key, timestamp)
+            return True
+        else:
+            return False
 
     def get(self):
         # TODO: consider sharding collection jobs into separate tasks
