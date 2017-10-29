@@ -37,6 +37,8 @@ function loadChartData() {
         var query = new google.visualization.Query(url, opts);
     
         // Send the query with a callback function.
+        // TODO: package this into a QueryWrapper:
+        // https://developers.google.com/chart/interactive/docs/examples#custom_gadget
         query.send(drawChart.bind({device: device}));
     }
 }
@@ -61,7 +63,10 @@ function drawChart(response) {
     // Set chart options
     var options = {'title':'Readings',
                    'width':600,
-                   'height':300};
+                   'height':300,
+                   // TODO: figure out how to get notified when the user zooms
+                   // past the edge of the data, so we can fetch more.
+                   'explorer':{},};
 
     // Instantiate and draw our chart, passing in some options.
     var chart = new google.visualization.LineChart(document.getElementById("chart_div_" + this.device));
