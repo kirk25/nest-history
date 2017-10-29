@@ -14,6 +14,11 @@
     <script src="/main.js"></script>
     <script type="text/javascript">
       var loadDataURL = "{{ loadURL }}";
+      var devices = [
+      {% for device in devices %}
+      "{{ device }}",
+      {% endfor %}
+      ];
     </script>
 
     <title>Nest History - Login</title>

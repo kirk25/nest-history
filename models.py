@@ -38,6 +38,12 @@ class Users(ndb.Model):
     token_valid_until = ndb.DateProperty()
 
 
+class Device(ndb.Model):
+    """Models a single nest device."""
+    user = ndb.StringProperty()
+    device_id = ndb.StringProperty()
+
+
 class DataPoint(ndb.Model):
     """Models a single data point polled from a thermostat."""
     # TODO: consider a unique kind for each user/structure/where combo, so that
