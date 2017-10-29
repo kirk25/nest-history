@@ -154,24 +154,36 @@ class Collect(webapp2.RequestHandler):
 class LoadData(webapp2.RequestHandler):
 
     def get(self):
+        device_id = self.request.GET.get('device')
+        tqx = self.request.GET.get('tqx')
+        if not device_id or not tqx:
+            self.response.status = '404 Not Found'
+            return
+
+        tqx_dict = {}
+        for pair in tqx.split(';'):
+            key, val = pair.split(':')
+            tqx_dict[key] = val
+
+        query = models.DataPoint.query().filter(
+            models.DataPoint.device_id == device_id,
+            models.DataPoint.last_connection >= 
+            datetime.datetime.now() - datetime.timedelta(0,21600)).order(
+            models.DataPoint.last_connection)
+
+        data = []
+        for point in query:
+            data.append([point.timestamp, point.ambient_temperature_f,
+                         point.humidity])
+
         description = [
             ('timestamp', 'datetime'),
             ('temperature', 'number'),
             ('humidity', 'number'),
         ]
-        data = []
-
-        query = models.DataPoint.query().filter(
-            models.DataPoint.timestamp >= 
-            datetime.datetime.now() - datetime.timedelta(0,21600), 
-            models.DataPoint.where_id == '').order(models.DataPoint.timestamp)
-        for point in query:
-            data.append([point.timestamp, point.ambient_temperature_f,
-                         point.humidity])
-
         data_table = gviz_api.DataTable(description)
         data_table.LoadData(data)
-        self.response.write(data_table.ToJSonResponse())
+        self.response.write(data_table.ToJSonResponse(req_id=tqx_dict['reqId']))
 
 
 class BackfillDataPoints(webapp2.RequestHandler):

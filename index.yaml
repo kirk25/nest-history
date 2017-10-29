@@ -2,5 +2,5 @@ indexes:
   
 - kind: DataPoint
   properties:
-    - name: where_id
-    - name: timestamp
+    - name: device_id
+    - name: last_connection

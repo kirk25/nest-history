@@ -27,14 +27,18 @@ google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(loadChartData);
 
 function loadChartData() {
-    document.getElementById('chart_div').innerHTML = 'Loading...'
+    for (i = 0; i < devices.length; i++) { 
+        var device = devices[i];
+        document.getElementById("chart_div_" + device).innerHTML = "Loading...";
     
-    var opts = {sendMethod: 'auto'};
-    // Replace the data source URL on next line with your data source URL.
-    var query = new google.visualization.Query(loadDataURL, opts);
+        var opts = {sendMethod: 'auto'};
+        var url = loadDataURL + "?device=" + device;
+        // Replace the data source URL on next line with your data source URL.
+        var query = new google.visualization.Query(url, opts);
     
-    // Send the query with a callback function.
-    query.send(drawChart);
+        // Send the query with a callback function.
+        query.send(drawChart.bind({device: device}));
+    }
 }
 
 // Callback that creates and populates a data table,
@@ -60,6 +64,6 @@ function drawChart(response) {
                    'height':300};
 
     // Instantiate and draw our chart, passing in some options.
-    var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+    var chart = new google.visualization.LineChart(document.getElementById("chart_div_" + this.device));
     chart.draw(data, options);
 }

@@ -28,7 +28,9 @@
   </head>
   <body>
     The time is {{ time }}
-    <div id="chart_div"></div>
+    {% for device in devices %}
+    <div id="chart_div_{{ device }}"></div>    
+    {% endfor %}
     <!-- TODO: enable user auth -->
     <!-- <div id="logged-out"> -->
     <!--   <h3>Sign in to access your history</h3> -->
