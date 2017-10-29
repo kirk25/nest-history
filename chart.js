@@ -50,7 +50,7 @@ function drawChart(response) {
     var data = response.getDataTable();
 
     // Convert to Pacific time.
-    // TODO: stop hard-coding the offset
+    // TODO: stop hard-coding the offset.  Also make it work.
     var formatter = new google.visualization.DateFormat({timeZone: -7});
     formatter.format(data, 0)
     

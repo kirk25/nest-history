@@ -42,6 +42,7 @@ import webapp2
 
 # App imports
 import models
+import update_schema
 
 # Use the App Engine Requests adapter. This makes sure that Requests uses
 # URLFetch.
@@ -94,6 +95,7 @@ class Collect(webapp2.RequestHandler):
         now = datetime.datetime.now()
         if thermostats:
             for (device_id, data) in thermostats.items():
+                self.addDeviceIfNecessary(device_id, user)
                 # last_connection has the format 2017-10-09T05:55:01.184Z
                 last_connection = datetime.datetime.strptime(
                     data['last_connection'], '%Y-%m-%dT%H:%M:%S.%fZ')
@@ -124,6 +126,12 @@ class Collect(webapp2.RequestHandler):
                     logging.info('Skipping duplicate data point for device %s',
                                  device_id)
             
+    def addDeviceIfNecessary(self, device_id, user):
+        # NDB's caching means this won't hit datastore very often.
+        query = models.Device.query(models.Device.device_id == device_id)
+        if not query.iter().has_next():
+            models.Device(user=user, device_id=device_id).put()
+
     def shouldUpdate(self, device_id, timestamp):
         key = '%s:last_connection' % device_id
         prev = memcache.get(key)
@@ -153,7 +161,10 @@ class LoadData(webapp2.RequestHandler):
         ]
         data = []
 
-        query = models.DataPoint.query().filter(models.DataPoint.timestamp >= datetime.datetime.now() - datetime.timedelta(0,21600), models.DataPoint.where_id == '').order(models.DataPoint.timestamp)
+        query = models.DataPoint.query().filter(
+            models.DataPoint.timestamp >= 
+            datetime.datetime.now() - datetime.timedelta(0,21600), 
+            models.DataPoint.where_id == '').order(models.DataPoint.timestamp)
         for point in query:
             data.append([point.timestamp, point.ambient_temperature_f,
                          point.humidity])
@@ -167,52 +178,20 @@ class BackfillDataPoints(webapp2.RequestHandler):
     # Temporary handler to backfill device ids in the database.
     # Also the minuite ordinal, since it's convenient to do now.
     def get(self):
-        deferred.defer(update_schema)
+        deferred.defer(update_schema.update_schema)
         
-
-def update_schema(cursor=None, num_updated=0, batch_size=100):
-    # Get all of the entities for this Model.
-    query = models.DataPoint.query()
-    data, next_cursor, more = query.fetch_page(
-        batch_size, start_cursor=cursor)
-    
-    to_put = []
-    for point in data:
-        if (not point.last_connection or 
-            point.last_connection == datetime.datetime.min):
-            point.last_connection = datetime.datetime.min
-            point.hour_ordinal = point.timestamp.hour
-            point.day_ordinal = point.timestamp.day
-        else:
-            point.minute_ordinal = point.last_connection.minute
-            point.hour_ordinal = point.last_connection.hour
-            point.day_ordinal = point.last_connection.day
-        to_put.append(point)
-
-    # Save the updated entities.
-    if to_put:
-        ndb.put_multi(to_put)
-        num_updated += len(to_put)
-        logging.info(
-            'Put {} entities to Datastore for a total of {}'.format(
-                len(to_put), num_updated))
-
-    # If there are more entities, re-queue this task for the next page.
-    if more:
-        deferred.defer(
-            update_schema, cursor=next_cursor, num_updated=num_updated)
-    else:
-        logging.debug(
-            'update_schema complete with {0} updates!'.format(
-                num_updated))
-
 
 class MainPage(webapp2.RequestHandler):
 
     def get(self):
+        # TODO: filter by the active user
+        query = models.Device.query()
+        device_list = [device.device_id for device in query]
+
         template_values = {
             'time': str(time.strftime('%m/%d/%Y %H:%M:%S %Z')),
-            'loadURL': urlparse.urljoin(self.request.url, '/loadData')
+            'loadURL': urlparse.urljoin(self.request.url, '/loadData'),
+            'devices': device_list,
         }
 
         template = JINJA_ENVIRONMENT.get_template('index.html')
