@@ -173,7 +173,7 @@ class LoadData(webapp2.RequestHandler):
 
         data = []
         for point in query:
-            data.append([point.timestamp, point.ambient_temperature_f,
+            data.append([point.last_connection, point.ambient_temperature_f,
                          point.humidity])
 
         description = [
