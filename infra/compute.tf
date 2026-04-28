@@ -25,6 +25,10 @@ resource "google_compute_instance" "nest_monitor" {
 
   tags = ["http-server", "https-server"]
 
+  metadata = {
+    ssh-keys = "kirk:ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOPMZCOepcofrpAWSK3rZa7yAQ7JWpVQB+zJWc3pd19r kirk@nest-monitor"
+  }
+
   service_account {
     email = "262126590832-compute@developer.gserviceaccount.com"
     scopes = [
