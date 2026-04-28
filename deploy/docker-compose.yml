@@ -28,7 +28,7 @@ services:
     env_file: .env.collector
     environment:
       - VICTORIAMETRICS_URL=http://victoriametrics:8428
-      - POLL_INTERVAL=300
+      - POLL_INTERVAL=30
     depends_on:
       - victoriametrics
 
