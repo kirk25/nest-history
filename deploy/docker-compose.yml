@@ -22,6 +22,16 @@ services:
     expose:
       - "3000"
 
+  collector:
+    build: ./collector
+    restart: unless-stopped
+    env_file: .env.collector
+    environment:
+      - VICTORIAMETRICS_URL=http://victoriametrics:8428
+      - POLL_INTERVAL=300
+    depends_on:
+      - victoriametrics
+
   caddy:
     image: caddy:latest
     restart: unless-stopped
