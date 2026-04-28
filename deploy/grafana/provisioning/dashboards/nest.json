@@ -8,7 +8,7 @@
       {
         "name": "device",
         "type": "query",
-        "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+        "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
         "query": "label_values(nest_ambient_temperature_celsius, device)",
         "multi": false,
         "includeAll": false,
@@ -32,7 +32,7 @@
       "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_ambient_temperature_celsius{device=~\"$device\"} * 9/5 + 32",
           "instant": true
         }
@@ -61,13 +61,13 @@
       "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_setpoint_heat_celsius{device=~\"$device\"} * 9/5 + 32",
           "instant": true,
           "legendFormat": "Heat"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_setpoint_cool_celsius{device=~\"$device\"} * 9/5 + 32",
           "instant": true,
           "legendFormat": "Cool"
@@ -85,7 +85,7 @@
       "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_ambient_humidity_percent{device=~\"$device\"}",
           "instant": true
         }
@@ -114,7 +114,7 @@
       "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_hvac_heating{device=~\"$device\"} * 2 + nest_hvac_cooling{device=~\"$device\"}",
           "instant": true
         }
@@ -144,7 +144,7 @@
       "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_eco_active{device=~\"$device\"}",
           "instant": true
         }
@@ -165,7 +165,7 @@
       "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_fan_active{device=~\"$device\"}",
           "instant": true
         }
@@ -186,17 +186,17 @@
       "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_ambient_temperature_celsius{device=~\"$device\"} * 9/5 + 32",
           "legendFormat": "Ambient"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_setpoint_heat_celsius{device=~\"$device\"} * 9/5 + 32",
           "legendFormat": "Heat Setpoint"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_setpoint_cool_celsius{device=~\"$device\"} * 9/5 + 32",
           "legendFormat": "Cool Setpoint"
         }
@@ -218,7 +218,7 @@
       "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_ambient_humidity_percent{device=~\"$device\"}",
           "legendFormat": "Humidity"
         }
@@ -235,17 +235,17 @@
       "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_hvac_heating{device=~\"$device\"}",
           "legendFormat": "Heating"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_hvac_cooling{device=~\"$device\"}",
           "legendFormat": "Cooling"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "datasource": { "type": "prometheus", "uid": \"P4169E866C3094E38\" },
           "expr": "nest_fan_active{device=~\"$device\"}",
           "legendFormat": "Fan"
         }
