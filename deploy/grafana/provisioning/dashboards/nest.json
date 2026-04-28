@@ -1,0 +1,264 @@
+{
+  "title": "Nest Thermostat",
+  "schemaVersion": 38,
+  "refresh": "5m",
+  "time": { "from": "now-24h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "device",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+        "query": "label_values(nest_ambient_temperature_celsius, device)",
+        "multi": false,
+        "includeAll": false,
+        "refresh": 2
+      }
+    ]
+  },
+  "__inputs": [
+    {
+      "name": "DS_VICTORIAMETRICS",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "label": "VictoriaMetrics"
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "title": "Temperature",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_ambient_temperature_celsius{device=~\"$device\"} * 9/5 + 32",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "fahrenheit",
+          "decimals": 1,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "blue" },
+              { "value": 65, "color": "green" },
+              { "value": 78, "color": "orange" }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value", "colorMode": "background", "graphMode": "none" }
+    },
+    {
+      "id": 2,
+      "title": "Setpoint",
+      "type": "stat",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_setpoint_heat_celsius{device=~\"$device\"} * 9/5 + 32",
+          "instant": true,
+          "legendFormat": "Heat"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_setpoint_cool_celsius{device=~\"$device\"} * 9/5 + 32",
+          "instant": true,
+          "legendFormat": "Cool"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "fahrenheit", "decimals": 1, "color": { "mode": "palette-classic" } }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value_and_name", "colorMode": "value", "graphMode": "none" }
+    },
+    {
+      "id": 3,
+      "title": "Humidity",
+      "type": "stat",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_ambient_humidity_percent{device=~\"$device\"}",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "blue" },
+              { "value": 30, "color": "green" },
+              { "value": 60, "color": "orange" }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value", "colorMode": "background", "graphMode": "none" }
+    },
+    {
+      "id": 4,
+      "title": "HVAC",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_hvac_heating{device=~\"$device\"} * 2 + nest_hvac_cooling{device=~\"$device\"}",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": null, "color": "green" },
+              { "value": 1, "color": "blue" },
+              { "value": 2, "color": "orange" }
+            ]
+          },
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "Off" }, "1": { "text": "Cooling" }, "2": { "text": "Heating" } } }
+          ]
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value", "colorMode": "background", "graphMode": "none" }
+    },
+    {
+      "id": 5,
+      "title": "Eco",
+      "type": "stat",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_eco_active{device=~\"$device\"}",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "green" }, { "value": 1, "color": "blue" }] },
+          "mappings": [{ "type": "value", "options": { "0": { "text": "Off" }, "1": { "text": "Eco" } } }]
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value", "colorMode": "background", "graphMode": "none" }
+    },
+    {
+      "id": 6,
+      "title": "Fan",
+      "type": "stat",
+      "gridPos": { "x": 20, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_fan_active{device=~\"$device\"}",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "green" }, { "value": 1, "color": "blue" }] },
+          "mappings": [{ "type": "value", "options": { "0": { "text": "Off" }, "1": { "text": "On" } } }]
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value", "colorMode": "background", "graphMode": "none" }
+    },
+    {
+      "id": 7,
+      "title": "Temperature History",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_ambient_temperature_celsius{device=~\"$device\"} * 9/5 + 32",
+          "legendFormat": "Ambient"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_setpoint_heat_celsius{device=~\"$device\"} * 9/5 + 32",
+          "legendFormat": "Heat Setpoint"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_setpoint_cool_celsius{device=~\"$device\"} * 9/5 + 32",
+          "legendFormat": "Cool Setpoint"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "fahrenheit", "decimals": 1 },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Heat Setpoint" }, "properties": [{ "id": "custom.lineStyle", "value": { "dash": [4, 4], "fill": "dash" } }, { "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }] },
+          { "matcher": { "id": "byName", "options": "Cool Setpoint" }, "properties": [{ "id": "custom.lineStyle", "value": { "dash": [4, 4], "fill": "dash" } }, { "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] },
+          { "matcher": { "id": "byName", "options": "Ambient" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }] }
+        ]
+      },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+    },
+    {
+      "id": 8,
+      "title": "Humidity History",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_ambient_humidity_percent{device=~\"$device\"}",
+          "legendFormat": "Humidity"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "decimals": 0, "min": 0, "max": 100, "color": { "mode": "fixed", "fixedColor": "blue" } }
+      },
+      "options": { "tooltip": { "mode": "single" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+    },
+    {
+      "id": 9,
+      "title": "HVAC Activity",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_hvac_heating{device=~\"$device\"}",
+          "legendFormat": "Heating"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_hvac_cooling{device=~\"$device\"}",
+          "legendFormat": "Cooling"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_VICTORIAMETRICS}" },
+          "expr": "nest_fan_active{device=~\"$device\"}",
+          "legendFormat": "Fan"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "min": 0, "max": 1, "custom": { "drawStyle": "bars", "fillOpacity": 60 } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "Heating" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "orange" } }] },
+          { "matcher": { "id": "byName", "options": "Cooling" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "blue" } }] },
+          { "matcher": { "id": "byName", "options": "Fan" }, "properties": [{ "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } }] }
+        ]
+      },
+      "options": { "tooltip": { "mode": "multi" }, "legend": { "displayMode": "list", "placement": "bottom" } }
+    }
+  ]
+}
