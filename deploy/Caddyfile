@@ -1,0 +1,4 @@
+# Replace :80 with your domain (e.g. "nest.example.com") to enable automatic HTTPS
+:80 {
+    reverse_proxy grafana:3000
+}
