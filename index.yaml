@@ -1,6 +1,0 @@
-indexes:
-  
-- kind: DataPoint
-  properties:
-    - name: device_id
-    - name: last_connection
