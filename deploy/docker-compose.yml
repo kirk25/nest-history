@@ -7,8 +7,8 @@ services:
     command:
       - -storageDataPath=/storage
       - -retentionPeriod=12
-    expose:
-      - "8428"
+    ports:
+      - "127.0.0.1:8428:8428"
 
   grafana:
     image: grafana/grafana:latest

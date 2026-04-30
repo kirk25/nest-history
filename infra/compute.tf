@@ -25,6 +25,8 @@ resource "google_compute_instance" "nest_monitor" {
 
   tags = ["http-server", "https-server"]
 
+  allow_stopping_for_update = true
+
   metadata = {
     ssh-keys = "${var.ssh_user}:${var.ssh_public_key}"
   }
@@ -32,7 +34,7 @@ resource "google_compute_instance" "nest_monitor" {
   service_account {
     email = var.compute_service_account
     scopes = [
-      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/devstorage.read_write",
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring.write",
       "https://www.googleapis.com/auth/pubsub",
