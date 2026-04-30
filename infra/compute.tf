@@ -1,12 +1,12 @@
 resource "google_compute_address" "nest_monitor" {
   name   = "nest-monitor-ip"
-  region = "us-west1"
+  region = var.region
 }
 
 resource "google_compute_instance" "nest_monitor" {
   name         = "nest-monitor"
   machine_type = "e2-micro"
-  zone         = "us-west1-b"
+  zone         = var.zone
 
   boot_disk {
     initialize_params {
@@ -26,11 +26,11 @@ resource "google_compute_instance" "nest_monitor" {
   tags = ["http-server", "https-server"]
 
   metadata = {
-    ssh-keys = "kirk:ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOPMZCOepcofrpAWSK3rZa7yAQ7JWpVQB+zJWc3pd19r kirk@nest-monitor"
+    ssh-keys = "${var.ssh_user}:${var.ssh_public_key}"
   }
 
   service_account {
-    email = "262126590832-compute@developer.gserviceaccount.com"
+    email = var.compute_service_account
     scopes = [
       "https://www.googleapis.com/auth/devstorage.read_only",
       "https://www.googleapis.com/auth/logging.write",

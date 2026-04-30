@@ -6,14 +6,15 @@ terraform {
     }
   }
 
+  # Backend bucket is passed at init time to avoid committing identifying info:
+  # terraform init -backend-config="bucket=your-tfstate-bucket"
   backend "gcs" {
-    bucket = "nest-thermostat-history-tfstate"
     prefix = "terraform/state"
   }
 }
 
 provider "google" {
-  project = "nest-thermostat-history"
-  region  = "us-west1"
-  zone    = "us-west1-b"
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
 }

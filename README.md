@@ -73,8 +73,11 @@ ssh -i ~/.ssh/nest_monitor <user>@<vm-ip> "docker restart nest-grafana-1"
 
 ### Infrastructure changes (`infra/`)
 
+Copy `infra/terraform.tfvars.example` to `infra/terraform.tfvars` and fill in your values, then:
+
 ```bash
 cd infra
+terraform init -backend-config="bucket=your-tfstate-bucket"
 terraform apply
 ```
 

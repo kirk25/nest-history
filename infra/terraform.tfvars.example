@@ -1,0 +1,9 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored and should never be committed.
+
+project_id              = "your-gcp-project-id"
+region                  = "us-west1"
+zone                    = "us-west1-b"
+ssh_user                = "your-username"
+ssh_public_key          = "ssh-ed25519 AAAA... user@host"
+compute_service_account = "PROJECT_NUMBER-compute@developer.gserviceaccount.com"
