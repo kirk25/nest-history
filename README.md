@@ -17,7 +17,7 @@ Google Smart Device Management (SDM) API.
                                     port 80/443
 ```
 
-All services run via Docker Compose on a GCP e2-micro VM (`us-west1-b`).
+All services run via Docker Compose on a GCP e2-micro VM.
 Infrastructure is managed with Terraform.
 
 ## Repository layout
@@ -38,13 +38,13 @@ infra/       Terraform config for GCP VM and firewall rules
 ## Connecting to the VM
 
 ```bash
-ssh -i ~/.ssh/nest_monitor kirk@8.229.167.176
+ssh -i ~/.ssh/nest_monitor <user>@<vm-ip>
 ```
 
 If direct SSH is unavailable, fall back to:
 
 ```bash
-gcloud compute ssh nest-monitor --project=nest-thermostat-history --zone=us-west1-b --ssh-key-file=~/.ssh/nest_monitor
+gcloud compute ssh <vm-name> --project=<gcp-project> --zone=<zone> --ssh-key-file=~/.ssh/nest_monitor
 ```
 
 ## Deploying changes
@@ -52,8 +52,8 @@ gcloud compute ssh nest-monitor --project=nest-thermostat-history --zone=us-west
 ### Collector code changes (`collector/`)
 
 ```bash
-rsync -av -e "ssh -i ~/.ssh/nest_monitor" collector/ kirk@8.229.167.176:~/nest/collector/
-ssh -i ~/.ssh/nest_monitor kirk@8.229.167.176 "cd ~/nest && docker compose up -d --build collector"
+rsync -av -e "ssh -i ~/.ssh/nest_monitor" collector/ <user>@<vm-ip>:~/nest/collector/
+ssh -i ~/.ssh/nest_monitor <user>@<vm-ip> "cd ~/nest && docker compose up -d --build collector"
 ```
 
 ### Deploy config changes (`deploy/`)
@@ -61,14 +61,14 @@ ssh -i ~/.ssh/nest_monitor kirk@8.229.167.176 "cd ~/nest && docker compose up -d
 Grafana provisioning, Caddyfile, or docker-compose.yml:
 
 ```bash
-rsync -av -e "ssh -i ~/.ssh/nest_monitor" deploy/ kirk@8.229.167.176:~/nest/
-ssh -i ~/.ssh/nest_monitor kirk@8.229.167.176 "cd ~/nest && docker compose up -d"
+rsync -av -e "ssh -i ~/.ssh/nest_monitor" deploy/ <user>@<vm-ip>:~/nest/
+ssh -i ~/.ssh/nest_monitor <user>@<vm-ip> "cd ~/nest && docker compose up -d"
 ```
 
 Restart a specific service after config changes:
 
 ```bash
-ssh -i ~/.ssh/nest_monitor kirk@8.229.167.176 "docker restart nest-grafana-1"
+ssh -i ~/.ssh/nest_monitor <user>@<vm-ip> "docker restart nest-grafana-1"
 ```
 
 ### Infrastructure changes (`infra/`)
@@ -82,10 +82,10 @@ terraform apply
 
 ```bash
 # All services
-ssh -i ~/.ssh/nest_monitor kirk@8.229.167.176 "docker compose -f ~/nest/docker-compose.yml logs -f"
+ssh -i ~/.ssh/nest_monitor <user>@<vm-ip> "docker compose -f ~/nest/docker-compose.yml logs -f"
 
 # Collector only
-ssh -i ~/.ssh/nest_monitor kirk@8.229.167.176 "docker logs -f nest-collector-1"
+ssh -i ~/.ssh/nest_monitor <user>@<vm-ip> "docker logs -f nest-collector-1"
 ```
 
 ## Secrets
